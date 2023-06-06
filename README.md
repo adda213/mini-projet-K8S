@@ -21,7 +21,7 @@ Les applications ou services seront déployées dans un cluster Minikube, donc �
 
 la creation du name space se fait par la creation d'un manifest de type YAML , cela permettra de creer un espace de travail specifique pour ce projet 
 
-```
+```yaml
 apiVersion: v1
 kind: Namespace
 metadata:
