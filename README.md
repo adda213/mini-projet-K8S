@@ -17,10 +17,16 @@ Les applications ou services seront déployées dans un cluster Minikube, donc �
 ------------
 
 
-## creation d'une image docker pour notre API aveec un test 
+## creation de la base de données MySQL pour l'application Wordpress ( backend) 
 
-Ce repository est une simple application qui permet d'afficher une liste d'étudiant à l'aide d'une API et un webserver PHP
-La création de notre API se fait par les étapes suivantes : 
+Le fichier ***mysql.yml*** permet de creer un deploiement qui contient 1 pod , ce depoliement et exposé en intrnet a l'aide d'un service de type Cluster IP ,cela permet a ce deploiement etre visible pour les autre deploiement qui sont dans le meme cluster, 
+voici certaines détails qui définit la configuration de ce backend : 
+![image](https://github.com/adda213/mini-projet-K8S/assets/123883398/49424d8d-8b09-46ab-ae10-87cf5c7bba14)
+définit le namespace dans ce backend doit etre creer 
+
+
+
+
 
 -  création d'un fichier ***Dockerfile*** dans le dossier simple api et respecter les étapes de build indiqué dans le repository suivant : [here](https://github.com/diranetafen/student-list.git "here")
 - la création de l'image avec la ligne de commande suivante dans le terminal (machine sous CentOS7 avec docker déjà installé), à ne pas oublier que la commande doit être exécutée dans le répertoire du ficher Dockerfile : 
