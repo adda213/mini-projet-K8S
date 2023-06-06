@@ -16,8 +16,10 @@ Les applications ou services seront déployées dans un cluster Minikube, donc �
 </p>
 ------------
 
+par la suite les manifests doivent etre crées comme suit : 
 
-## - creation de NAMESPACE
+
+## 1- creation de NAMESPACE
 
 la creation du name space se fait par la creation d'un manifest de type YAML , cela permettra de creer un espace de travail specifique pour ce projet 
 
@@ -29,7 +31,7 @@ metadata:
   labels:
     name: wordpress
 ```
-## - creation de PVC ( Persistant Volume Claim ) pour le Backend et Frontend 
+## 2- creation de PVC ( Persistant Volume Claim ) pour le Backend et Frontend 
 
 le PVC est une demande de stockage par un utilisateur , cela est essentiel pour les deux deploiment pour permettre le stockage et la lecture des donnés ( dans ce cas localement ) .
 PS : le PV est une piece de stockage dans le cluster provisonné par l'administrateur , cette section est decalé dans le meme manifest de deploiement .
@@ -66,6 +68,169 @@ spec:
   resources:
     requests:
       storage: 20Gi
+```
+## 3- creation des deploiment MySQL et WORDPRESS 
+
+dans cette étape du projet , 2 depoiement doivent etre creer pour chacune des application (frontend et backend) , a savoir et a ne pas oublier : 
+  - MySQL : 
+      * il faut declarer les varibales d'environnement qui permettre a wordpress de se connecter a la base de données (                       `MYSQL_DATABASE` , `MYSQL_USER`, `MYSQL_PASSWORD`,`MYSQL_RANDOM_ROOT_PASSWORD` )
+      * declaer le service de type CLUSTERIP , pour rendre le backend visible pour les autre applicatioon qui se trouve dans le meme          cluster
+      * declarer le fichier secret qui contient les mot de passe de la base de données 
+```yaml deploiment 
+# MySQL + CLUSTERIP + PV
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wordpress
+  labels:
+    app: wordpress
+  namespace : wordpress
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wordpress
+      tier: frontend
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: wordpress
+        tier: frontend
+    spec:
+       containers:
+       - image: wordpress:latest
+         name: wordpress
+         env:
+         - name: WORDPRESS_DB_HOST
+           value: mysql-dep
+         - name: WORDPRESS_DB_USER
+           value: wordpress
+         - name: WORDPRESS_DB_NAME
+           value: wordpress
+         - name: WORDPRESS_DB_PASSWORD
+           valueFrom:
+             secretKeyRef:
+               name: mysql-secret
+               key: wordpress_db_password
+         ports:
+         - containerPort: 80
+           name: wordpress
+         volumeMounts:
+         - name: wordpress-persistent-storage
+           mountPath: /var/www/html
+       volumes:
+       - name: wordpress-persistent-storage
+         persistentVolumeClaim:
+           claimName: wp-pv-claim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-wordpress
+  labels: 
+    app: wordpress
+  namespace : wordpress
+spec:
+  type: NodePort
+  selector:
+    app: wordpress
+    tier: frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+      nodePort: 30008
+```   
+```yaml
+
+# fichier SECRET  
+apiVersion: v1
+data:
+  login: YWRkYQ==
+  mysql_password: YWRkYQ==
+  wordpress_db_password: YWRkYQ==
+  mysql_random_root_password: YWRkYQ==
+kind: Secret
+metadata:
+  name: mysql-secret
+  namespace: wordpress
+type: Opaque
+```
+
+  - WORDPRESS : 
+      * il faut declarer les varibales d'environnement qui permettre a wordpress de se connecter a la base de données (                       `WORDPRESS_DB_HOST` , `WORDPRESS_DB_USER`, `WORDPRESS_DB_NAME`,`WORDPRESS_DB_PASSWORD` )
+      * la valeur de `WORDPRESS_DB_HOST` doit etre identique au nom de service deu CLUSTERIP pour le Frontend ( dans ce cas `mysql-           dep`
+      * declaer le service de type NodePort , pour rendre le frontend accessible depuis l'exterieur
+      * declarer les secrets dans le meme ficher secret crée pour le backend
+
+```yaml
+# WORDPRESS + NODEPORT + PV
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wordpress
+  labels:
+    app: wordpress
+  namespace : wordpress
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wordpress
+      tier: frontend
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: wordpress
+        tier: frontend
+    spec:
+       containers:
+       - image: wordpress:latest
+         name: wordpress
+         env:
+         - name: WORDPRESS_DB_HOST
+           value: mysql-dep
+         - name: WORDPRESS_DB_USER
+           value: wordpress
+         - name: WORDPRESS_DB_NAME
+           value: wordpress
+         - name: WORDPRESS_DB_PASSWORD
+           valueFrom:
+             secretKeyRef:
+               name: mysql-secret
+               key: wordpress_db_password
+         ports:
+         - containerPort: 80
+           name: wordpress
+         volumeMounts:
+         - name: wordpress-persistent-storage
+           mountPath: /var/www/html
+       volumes:
+       - name: wordpress-persistent-storage
+         persistentVolumeClaim:
+           claimName: wp-pv-claim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-wordpress
+  labels: 
+    app: wordpress
+  namespace : wordpress
+spec:
+  type: NodePort
+  selector:
+    app: wordpress
+    tier: frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+      nodePort: 30008
 ```
 -  création d'un fichier ***Dockerfile*** dans le dossier simple api et respecter les étapes de build indiqué dans le repository suivant : [here](https://github.com/diranetafen/student-list.git "here")
 - la création de l'image avec la ligne de commande suivante dans le terminal (machine sous CentOS7 avec docker déjà installé), à ne pas oublier que la commande doit être exécutée dans le répertoire du ficher Dockerfile : 
