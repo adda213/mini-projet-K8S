@@ -23,50 +23,50 @@ la creation du name space se fait par la creation d'un manifest de type YAML , c
 
 ```yaml
 apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: mysql-pv-claim
-  labels:
-    app: wordpress
-  namespace : wordpress
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 20Gi
-```
-
-
-```yaml
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: mysql-pv-claim
-  labels:
-    app: wordpress
-  namespace : wordpress
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 20Gi
-```
-## - creation de PVC ( Persistant Volume Claim ) pour le Backend et Frontend 
-
-le PVC est une demande de stockage par un utilisateur , cela est essentiel pour les deux deploiment pour permettre le stockage et la lecture des donnés ( dans ce cas localement ) .
-PS : le PV est une piece de stockage dans le cluster provisonné par l'administrateur , cette section est decalé dans le meme manifest de deploiement .
-
-```yaml
-apiVersion: v1
 kind: Namespace
 metadata:
   name: wordpress
   labels:
     name: wordpress
 ```
+## - creation de PVC ( Persistant Volume Claim ) pour le Backend et Frontend 
 
+le PVC est une demande de stockage par un utilisateur , cela est essentiel pour les deux deploiment pour permettre le stockage et la lecture des donnés ( dans ce cas localement ) .
+PS : le PV est une piece de stockage dans le cluster provisonné par l'administrateur , cette section est decalé dans le meme manifest de deploiement .
+
+
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pv-claim
+  labels:
+    app: wordpress
+  namespace : wordpress
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+```
+
+
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pv-claim
+  labels:
+    app: wordpress
+  namespace : wordpress
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+```
 -  création d'un fichier ***Dockerfile*** dans le dossier simple api et respecter les étapes de build indiqué dans le repository suivant : [here](https://github.com/diranetafen/student-list.git "here")
 - la création de l'image avec la ligne de commande suivante dans le terminal (machine sous CentOS7 avec docker déjà installé), à ne pas oublier que la commande doit être exécutée dans le répertoire du ficher Dockerfile : 
 
