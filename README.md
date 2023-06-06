@@ -1,7 +1,7 @@
 
 # WORDPRESS WITH K8S PROJECT
 
-dans ce repository se trouve un ensemble de manifests qui permettra de deployer des applications type frontend ( wordpress) et backend( my-sql) et mettre en oeuvre les services qui établirons la connextion entre les deux , le deploiement ce fait a l'aide de Kubernetes pour orchestrer nos applications (scalabilité , nombre de relicas ... etc ) 
+Dans ce repository se trouve un ensemble de manifestes qui permettra de déployer des applications type frontend (WordPress) et backend (MySQL) et mettre en œuvre les services qui établirons la connexion entre les deux, le déploiement se fait à l'aide de Kubernetes pour orchestrer nos applications (scalabilité, nombre de réplicas ... etc.) 
 
 <p align="center">
   <img src="https://github.com/adda213/mini-projet-K8S/assets/123883398/4ce7c815-98de-45a9-bc6a-54aa2a6e6a7e">
@@ -16,12 +16,12 @@ Les applications ou services seront déployées dans un cluster Minikube, donc �
 </p>
 ------------
 
-par la suite les manifests doivent etre crées comme suit : 
+par la suite les manifestes doivent être crées comme suit : 
 
 
-## 1- creation de NAMESPACE
+## 1- création de NAMESPACE
 
-la creation du name space se fait par la creation d'un manifest de type YAML , cela permettra de creer un espace de travail specifique pour ce projet 
+la création du Name space se fait par la création d'un manifeste de type YAML, cela permettra de créer un espace de travail spécifique pour ce projet 
 
 ```yaml
 apiVersion: v1
@@ -31,27 +31,10 @@ metadata:
   labels:
     name: wordpress
 ```
-## 2- creation de PVC ( Persistant Volume Claim ) pour le Backend et Frontend 
+## 2- création de PVC (Persistant Volume Claim) pour le Backend et Frontend 
 
-le PVC est une demande de stockage par un utilisateur , cela est essentiel pour les deux deploiment pour permettre le stockage et la lecture des donnés ( dans ce cas localement ) .
-PS : le PV est une piece de stockage dans le cluster provisonné par l'administrateur , cette section est decalé dans le meme manifest de deploiement .
-
-
-```yaml
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: mysql-pv-claim
-  labels:
-    app: wordpress
-  namespace : wordpress
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 20Gi
-```
+le PVC est une demande de stockage par un utilisateur, cela est essentiel pour les deux déploiements pour permettre le stockage et la lecture des donnés (dans ce cas localement).
+PS : le PV est une pièce de stockage dans le cluster provisionné par l’administrateur, cette section est décalée dans le même manifeste de déploiement.
 
 
 ```yaml
@@ -69,14 +52,31 @@ spec:
     requests:
       storage: 20Gi
 ```
-## 3- creation des deploiment MySQL et WORDPRESS 
 
-dans cette étape du projet , 2 depoiement doivent etre creer pour chacune des application (frontend et backend) , a savoir et a ne pas oublier : 
+
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pv-claim
+  labels:
+    app: wordpress
+  namespace : wordpress
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+```
+## 3- création des déploiement MySQL et WORDPRESS 
+
+dans cette étape du projet, 2 déploiements doivent être créer pour chacune des application (frontend et backend), à savoir et à ne pas oublier : 
   - MySQL : 
-      * il faut declarer les varibales d'environnement qui permettre a wordpress de se connecter a la base de données (                       `MYSQL_DATABASE` , `MYSQL_USER`, `MYSQL_PASSWORD`,`MYSQL_RANDOM_ROOT_PASSWORD` )
-      * declaer le service de type CLUSTERIP , pour rendre le backend visible pour les autre applicatioon qui se trouve dans le meme          cluster
-      * declarer le fichier secret qui contient les mot de passe de la base de données 
-```yaml deploiment 
+      * il faut déclarer les variables d'environnement qui permettre à WordPress de se connecter à la base de données (`MYSQL_DATABASE`, `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_RANDOM_ROOT_PASSWORD`)
+      * déclare le service de type CLUSTERIP, pour rendre le backend visible pour les autres applications qui se trouve dans le même cluster
+      * déclarer le fichier secret qui contient les mots de passe de la base de données 
+```yaml deployment 
 # MySQL + CLUSTERIP + PV
 apiVersion: apps/v1
 kind: Deployment
@@ -160,10 +160,10 @@ type: Opaque
 ```
 
   - WORDPRESS : 
-      * il faut declarer les varibales d'environnement qui permettre a wordpress de se connecter a la base de données (                       `WORDPRESS_DB_HOST` , `WORDPRESS_DB_USER`, `WORDPRESS_DB_NAME`,`WORDPRESS_DB_PASSWORD` )
-      * la valeur de `WORDPRESS_DB_HOST` doit etre identique au nom de service deu CLUSTERIP pour le Frontend ( dans ce cas `mysql-           dep`
-      * declaer le service de type NodePort , pour rendre le frontend accessible depuis l'exterieur
-      * declarer les secrets dans le meme ficher secret crée pour le backend
+      * il faut declarer les variables d'environnement qui permettre à WordPress de se connecter à la base de données (`WORDPRESS_DB_HOST`, `WORDPRESS_DB_USER`, `WORDPRESS_DB_NAME`, `WORDPRESS_DB_PASSWORD`)
+      * la valeur de `WORDPRESS_DB_HOST` doit être identique au nom de service de CLUSTERIP pour le Frontend (dans ce cas `mysql-dep`)
+      * déclarer le service de type Node Port, pour rendre le frontend accessible depuis l'extérieur
+      * declarer les secrets dans le même ficher secret crée pour le backend
 
 ```yaml
 # WORDPRESS + NODEPORT + PV
@@ -232,110 +232,13 @@ spec:
       targetPort: 80
       nodePort: 30008
 ```
--  création d'un fichier ***Dockerfile*** dans le dossier simple api et respecter les étapes de build indiqué dans le repository suivant : [here](https://github.com/diranetafen/student-list.git "here")
-- la création de l'image avec la ligne de commande suivante dans le terminal (machine sous CentOS7 avec docker déjà installé), à ne pas oublier que la commande doit être exécutée dans le répertoire du ficher Dockerfile : 
+## 4- DEPLOIEMENT DES MANIFESTS 
+
+après la création de tous les manifestes, il ne reste qu'à appliquer tous les fichiers, soit par utiliser un fichier de kustumisation.yml, ou bien comme dans ce cas à appliquer la commande suivante dans le répertoire des manifestes : 
 
 ```
-docker build -t pozos:v1 .
-```
-- démarrer le conteneur qui contient l'application après la création de l'image (POZOS) (à ne pas oublier de monter le volume qui contient les fichiers de l'API dans le dossier spécifié par les développeurs) : 
-
-```
-docker run --name pozos -d -p 80:5000 -v ./:/data/ pozos:v1
-```
-- tester le fonctionnement de l'application avec la commande suivante (host API est indiqué sur  3: enp0s8 en utilisant la commande ` ip a;`):
-
-```
-curl -u toto:python -X GET http://<host IP>:<API exposed port>/pozos/api/v1.0/get_student_ages
-```
-- le résultat de cette ligne de commande doit être cette liste : 
-```
-{
-  "student_ages": {
-    "alice": "12", 
-    "bob": "13"
-  }
-}
+kubebctl apply -f ./
 ```
 
-- supprimer le conteneur après le bon fonctionnement du test avec la commande suivante : 
-```
-docker ps  #pour récupérer ID du conteneur
-docker rm <ID conteneur> 
-```
+le résultat doit être comme suit : 
 
-### création de l'infrastructure à l'aide de docker compose
-
-Dans cette partie de ce projet, nous allons créer le site qui permettre d'afficher la liste d’étudiant, le site est tout simplement un conteneur crée à la base d'une image PHP qui permettre de lire le ficher PHP crée par le développeur de l'application et afficher la liste des étudiant, nous allons suivre les étapes suivantes : 
-
-- création du ficher ***docker-compose.yml*** :
-```
-vi docker-compose.yml
-```
-Dans notre cas, pozos représente l’API, et PHP représente le website
-
-POZOS : ne pas oublier à monter le volume qui contient les ficher de l’API.
-
-![image](https://github.com/adda213/mini-projet-docker/assets/123883398/cfce9f0f-9dda-4098-88ef-66d856c5c7eb)
-
-
-PHP : le username est toto , password est python 
-
-![image](https://github.com/adda213/mini-projet-docker/assets/123883398/f2c2c8ff-d576-43d8-b364-20a13bf4f1cf)
-
-
-- avant de lancer le docker compose ne pas oublier de modifier la ligne 29 dans le ficher student-list/website/index.php avec les bon paramètres (HOST API, Port), exécutez le docker compose à l'aide de la ligne de commande suivante : 
-
-```
-Docker compose up -d
-```
-
-- vérifier que le site est fonctionnel, et le résultat doit être comme suit : 
-![22](https://github.com/adda213/mini-projet-docker/assets/123883398/465d8afa-c04d-41c4-bf97-54309c7b5fb4)
-
-
-## CREATION D'UN REGISTRY LOCAL 
-
-Apres la création et le test de notre application , nous allons stocké notre image que nous avons testé dans un  registry et afficher à l'aide d'une interface d'usage toutes les images que nous avons stocké .
-
-![image](https://github.com/adda213/mini-projet-docker/assets/123883398/8289f5bc-2ade-4ed5-a9aa-cab40d9ea24f)
-
-- image : représente l'image de l'application et la version de REGISTRY utilisé pour créer le conteneur registry, 
-- volume : représente le volume monté dans le conteur qui permettre le stockage des images localement.
-- ports : 5000 à gauche représente le ports externe, 5000 à droite représente le port interne
-- network : représente le réseau qui contient notre conteneur, ce réseau est ajouté afin de créer une communication interne entre le registry , et l'interface d'usage .
-
-## CREATION D'UNE INTERFACE D'USAGE
-
-Cette interface va nous permettre de nous afficher toute images stocké dans le registry local, et permettre aussi de gérer les images par l'ajout des variables d'environnement qui reste optionnel dans ce projet . 
-
-![image](https://github.com/adda213/mini-projet-docker/assets/123883398/e0cbb06a-2160-4ab8-a76e-ffaa57d135e1)
-
-- image : représente l'image de l'application et la version de REGISTRY_UI utilisé pour créer le conteneur.
-- ports : 4000 à gauche représente le ports externe, 80 à droite représente le port interne
-- environnement : représente les variable d'environnement indispensable et optionnel 
-    REGISTRY_TITLE : le titre du REGISTRY_UI
-    NGINX_PROXY_PASS_URL : Mettez à jour la configuration Nginx par défaut et définissez le proxy_pass sur votre registre backend      docker
-    SINGLE_REGISTRY : permettre d'autoriser ou non de changer dynamiquement le REGISTRY URL (en cas plusieurs registry)
-    SHOW_CONTENT_DIGEST : permet de voir le détail du docker tags 
-    
-Après la modification du ficher docker compose, il faut le relancer en utilisant la commande suivante : 
-
-```
-Docker compose up -d
-```
-Créer un nouveau tag pour l'image pozos : 
-```
-docker tag pozos:v1 localhost:5000/pozos:v1
-```
-Pousser l'application dans le registry local : 
-```
-docker push localhost:5000/pozos:v1
-```
-![image](https://github.com/adda213/mini-projet-docker/assets/123883398/df8c73df-ea56-4aae-bdba-49fe5feaa9f4)
-
-Vérifier que le REGISTRY_UI et fonctionnel, et que notre image est bien affichée dans le registry_ui :
-
-![image](https://github.com/adda213/mini-projet-docker/assets/123883398/ba8f6c09-fd9c-458d-b30d-6932ea10b211)
-
-FIN.
