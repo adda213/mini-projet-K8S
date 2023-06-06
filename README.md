@@ -4,7 +4,7 @@
 dans ce repository se trouve un ensemble de manifests qui permettra de deployer des applications type frontend ( wordpress) et backend( my-sql) et mettre en oeuvre les services qui établirons la connextion entre les deux , le deploiement ce fait a l'aide de Kubernetes pour orchestrer nos applications (scalabilité , nombre de relicas ... etc ) 
 
 <p align="center">
-  <img src="https://github.com/adda213/mini-projet-K8S/assets/123883398/a7cce759-f575-4048-a6e8-1cd53bbe732f">
+  <img src="https://github.com/adda213/mini-projet-K8S/assets/123883398/4ce7c815-98de-45a9-bc6a-54aa2a6e6a7e">
 </p>
 
 ## architecture du projet 
@@ -12,7 +12,7 @@ dans ce repository se trouve un ensemble de manifests qui permettra de deployer 
 Les applications ou services seront déployées dans un cluster Minikube, donc à un seul nœud et devront respecter l’architecture suivante.
 
 <p align="center">
-  <img src="https://github.com/adda213/mini-projet-K8S/assets/123883398/5a10304f-d0c1-4e15-b5e3-97b8c8b61641">
+  <img src="https://github.com/adda213/mini-projet-K8S/assets/123883398/2fd5d391-9fb0-4223-8ffb-ed1c5ec427ca">
 </p>
 ------------
 
