@@ -242,3 +242,4 @@ kubebctl apply -f ./
 
 le résultat doit être comme suit : 
 
+![image](https://github.com/adda213/mini-projet-K8S/assets/123883398/291f7651-10d4-44dd-ac65-3e5978459b71)
