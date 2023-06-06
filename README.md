@@ -25,6 +25,11 @@ voici certaines détails qui définit la configuration de ce backend :
 - ![image](https://github.com/adda213/mini-projet-K8S/assets/123883398/49424d8d-8b09-46ab-ae10-87cf5c7bba14)
 définit le namespace dans ce backend doit etre creer 
 
+- ![image](https://github.com/adda213/mini-projet-K8S/assets/123883398/10a14946-1b5c-4e85-b790-b906cb8823b5)
+le nombre de relicasets a creer ( relicas peut contenir plusieurs pods )
+
+- 
+
 
 
 
